@@ -8,37 +8,82 @@ stages:
   - security
   - build
   - dast
+  - deploy-stage
 
 lint:
   stage: lint
-  image: python:3.10-slim
+  image: python:3.12-slim
   script:
     - pip install flake8
     - flake8 app run.py config.py
 
 test:
   stage: test
-  image: python:3.10-slim
+  image: python:3.12-slim
   script:
     - pip install -r requirements.txt
     - pip install -r requirements-dev.txt
-    - pytest -q
+    - pytest -q --cov=app --cov-report=xml
 
 sast:
   stage: security
-  image: python:3.10-slim
+  image: python:3.12-slim
   script:
     - pip install bandit
-    - bandit -r app || true
+    - bash scripts/run_sast.sh
+  artifacts:
+    when: always
+    paths:
+      - reports/bandit-report.json
 
-build:
-  stage: build
-  image: alpine:latest
+dependency-check:
+  stage: security
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   script:
+    - apk add --no-cache bash
+    - bash scripts/run_dependency_check.sh
+  artifacts:
+    when: always
+    paths:
+      - reports/
+
+docker-build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker build -t taskguard:latest .
     - echo "BUILD OK"
 
 dast:
   stage: dast
-  image: alpine:latest
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   script:
-    - echo "DAST OK (executado localmente via ZAP)"
+    - apk add --no-cache bash
+    - bash scripts/run_dast.sh --no-compose
+  artifacts:
+    when: always
+    paths:
+      - reports/zap-report.html
+      - reports/zap-report.json
+
+deploy-stage:
+  stage: deploy-stage
+  script:
+    - echo "Deploy para staging"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

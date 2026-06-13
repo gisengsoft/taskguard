@@ -43,16 +43,27 @@ if [[ "$USE_COMPOSE" == true ]]; then
     sleep 3
   done
 
-  echo "==> [DAST] Executando OWASP ZAP Baseline Scan via compose..."
-  docker compose --profile security run --rm zap || true
-  # Move os relatórios gerados em pipeline/zap para reports/.
-  cp -f "${ZAP_WORK}/zap-report.html" "${REPORTS_DIR}/" 2>/dev/null || true
-  cp -f "${ZAP_WORK}/zap-report.json" "${REPORTS_DIR}/" 2>/dev/null || true
+  echo "==> [DAST] Executando OWASP ZAP Baseline Scan via container..."
+  container_id=$(docker create --rm \
+    --network taskguard_taskguard-net \
+    ghcr.io/zaproxy/zaproxy:stable \
+    zap-baseline.py -t "http://taskguard-web:8000" -c rules.tsv -r zap-report.html -J zap-report.json -I)
+
+  if [ -f "pipeline/zap/rules.tsv" ]; then
+    docker cp "pipeline/zap/rules.tsv" "$container_id:/zap/wrk/rules.tsv"
+  fi
+
+  docker start -a "$container_id" || true
+  docker cp "$container_id:/zap/wrk/zap-report.html" "${REPORTS_DIR}/" || true
+  docker cp "$container_id:/zap/wrk/zap-report.json" "${REPORTS_DIR}/" || true
 else
   echo "==> [DAST] Escaneando alvo externo: ${TARGET}"
-  docker run --rm -v "$(pwd)/${REPORTS_DIR}:/zap/wrk:rw" \
+  container_id=$(docker create --rm \
     ghcr.io/zaproxy/zaproxy:stable \
-    zap-baseline.py -t "${TARGET}" -r zap-report.html -J zap-report.json -I || true
+    zap-baseline.py -t "${TARGET}" -r zap-report.html -J zap-report.json -I)
+  docker start -a "$container_id" || true
+  docker cp "$container_id:/zap/wrk/zap-report.html" "${REPORTS_DIR}/" || true
+  docker cp "$container_id:/zap/wrk/zap-report.json" "${REPORTS_DIR}/" || true
 fi
 
 echo "==> [DAST] Scan concluído. Relatório em ${REPORTS_DIR}/zap-report.html"
