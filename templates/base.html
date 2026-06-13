@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}TaskGuard{% endblock %} · TaskGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="{{ url_for('main.index') }}">
+        <span class="brand__mark" aria-hidden="true">⛨</span>
+        <span class="brand__name">Task<b>Guard</b></span>
+        <span class="brand__tag">DevSecOps</span>
+      </a>
+      {% if current_user.is_authenticated %}
+      <nav class="nav">
+        <span class="nav__user">sessão: <b>{{ current_user.username }}</b></span>
+        <form class="inline-form" method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn--ghost btn--sm">Sair</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  {% block layout %}
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+  {% endblock %}
+
+  <footer class="footer">
+    TaskGuard <code>v{{ app_version }}</code> · Gerenciador Seguro de Tarefas ·
+    pipeline DevSecOps com Bandit · OWASP Dependency-Check · OWASP ZAP
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" nonce="{{ csp_nonce() }}"></script>
+</body>
+</html>

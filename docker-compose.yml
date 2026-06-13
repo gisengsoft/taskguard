@@ -1,0 +1,138 @@
+# ============================================================================
+# TaskGuard — Orquestração de containers
+#
+# Serviços:
+#   db       → PostgreSQL 16 (persistência da aplicação)
+#   web      → aplicação Flask sob Gunicorn (porta 8000)
+#   syslog   → coletor de logs central (syslog-ng) recebendo eventos via UDP/514
+#   zap      → OWASP ZAP para o scan DAST (ativado pelo profile "security")
+#
+# Uso padrão (db + app + logs):
+#   docker compose up -d --build
+#
+# Rodar o DAST sob demanda:
+#   docker compose --profile security run --rm zap
+#
+# O Postgres expõe a porta 5433 no host para você inspecionar o banco com o
+# pgAdmin instalado na sua máquina.
+# ============================================================================
+
+services:
+  # ----------------------------------------------------------------------- #
+  # Banco de dados — PostgreSQL 16
+  # ----------------------------------------------------------------------- #
+  db:
+    image: postgres:16-alpine
+    container_name: taskguard-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-taskguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taskguard}
+      POSTGRES_DB: ${POSTGRES_DB:-taskguard}
+    volumes:
+      # Volume nomeado: os dados sobrevivem a "docker compose down".
+      - taskguard-db-data:/var/lib/postgresql/data
+    ports:
+      # PORTA ALTERADA PARA 5433 NO HOST PARA EVITAR CONFLITO COM POSTGRES LOCAL
+      - "5433:5432"
+    networks:
+      - taskguard-net
+    healthcheck:
+      # A app só sobe depois que o Postgres aceitar conexões.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-taskguard} -d ${POSTGRES_DB:-taskguard}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ----------------------------------------------------------------------- #
+  # Aplicação web
+  # ----------------------------------------------------------------------- #
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: taskguard:latest
+    container_name: taskguard-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      FLASK_CONFIG: production
+      # Conexão com o Postgres pelo nome de serviço 'db' na rede interna na porta 5432.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-taskguard}:${POSTGRES_PASSWORD:-taskguard}@db:5432/${POSTGRES_DB:-taskguard}
+      SYSLOG_ENABLED: "true"
+      SYSLOG_HOST: syslog
+      SYSLOG_PORT: "514"
+      APP_PORT: "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persiste apenas os logs no host (auditoria e Fail2Ban).
+      - ./logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      syslog:
+        condition: service_started
+    networks:
+      - taskguard-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    # Endurecimento do container em runtime.
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    cap_drop:
+      - ALL
+
+  # ----------------------------------------------------------------------- #
+  # Coletor de logs central (syslog)
+  # ----------------------------------------------------------------------- #
+  syslog:
+    image: balabit/syslog-ng:4.5.0
+    container_name: taskguard-syslog
+    restart: unless-stopped
+    command: ["--no-caps"]
+    volumes:
+      - ./docker/syslog/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
+      - ./logs/central:/var/log/central
+    ports:
+      - "5514:514/udp"
+    networks:
+      - taskguard-net
+
+  # ----------------------------------------------------------------------- #
+  # OWASP ZAP — DAST (somente sob demanda, profile "security")
+  # ----------------------------------------------------------------------- #
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    container_name: taskguard-zap
+    profiles: ["security"]
+    depends_on:
+      web:
+        condition: service_healthy
+    volumes:
+      - ./pipeline/zap:/zap/wrk:rw
+    # Baseline scan: passivo, rápido, ideal para CI. Gera relatório HTML.
+    command: >
+      zap-baseline.py
+      -t http://web:8000
+      -c rules.tsv
+      -r zap-report.html
+      -J zap-report.json
+      -I
+    networks:
+      - taskguard-net
+
+networks:
+  taskguard-net:
+    driver: bridge
+
+volumes:
+  taskguard-db-data:
+    driver: local

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Requisição inválida{% endblock %}
+{% block content %}
+<div class="errorpage">
+  <div class="errorpage__code">400</div>
+  <h1>Requisição inválida</h1>
+  <p class="errorpage__msg">Algo na sua solicitação não pôde ser processado. Verifique e tente novamente.</p>
+  <a class="btn btn--primary" href="{{ url_for('main.index') }}">Voltar ao início</a>
+</div>
+{% endblock %}

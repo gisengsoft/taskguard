@@ -1,0 +1,25 @@
+[flake8]
+# ============================================================================
+# Regras de lint do TaskGuard.
+# ============================================================================
+max-line-length = 100
+max-complexity = 12
+
+# Diretórios fora do escopo da análise.
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    build,
+    dist,
+    docs,
+    reports
+
+# E203/W503 conflitam com formatação moderna; E501 tratada por max-line-length.
+extend-ignore = E203, W503
+
+# Permite asserts e imports não usados em __init__ quando fizer sentido.
+per-file-ignores =
+    __init__.py: F401
+    tests/*: S101

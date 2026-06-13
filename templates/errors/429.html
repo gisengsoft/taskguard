@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Muitas requisições{% endblock %}
+{% block content %}
+<div class="errorpage">
+  <div class="errorpage__code">429</div>
+  <h1>Muitas requisições</h1>
+  <p class="errorpage__msg">Você excedeu o limite de requisições. Aguarde um instante e tente novamente.</p>
+  <a class="btn btn--primary" href="{{ url_for('main.index') }}">Voltar ao início</a>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Minhas tarefas{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Painel de controle</p>
+    <h1>Minhas tarefas</h1>
+  </div>
+  <a class="btn btn--primary" href="{{ url_for('tasks.create_task') }}">+ Nova tarefa</a>
+</div>
+
+<!-- Estatísticas -->
+<section class="stats" aria-label="Resumo das tarefas">
+  <div class="stat stat--total">
+    <div class="stat__num">{{ stats.total }}</div>
+    <div class="stat__label">Total</div>
+  </div>
+  <div class="stat stat--pending">
+    <div class="stat__num">{{ stats.pending }}</div>
+    <div class="stat__label">Pendentes</div>
+  </div>
+  <div class="stat stat--progress">
+    <div class="stat__num">{{ stats.in_progress }}</div>
+    <div class="stat__label">Em andamento</div>
+  </div>
+  <div class="stat stat--done">
+    <div class="stat__num">{{ stats.done }}</div>
+    <div class="stat__label">Concluídas</div>
+  </div>
+</section>
+
+<!-- Busca e filtro -->
+<form class="toolbar" method="get" action="{{ url_for('tasks.list_tasks') }}">
+  <div class="search">
+    {{ form.q(type="search", value=active_term, placeholder="Buscar por título ou descrição…") }}
+    {{ form.status() }}
+    <button type="submit" class="btn">Filtrar</button>
+  </div>
+  {% if active_term or active_status %}
+  <a class="btn btn--ghost btn--sm" href="{{ url_for('tasks.list_tasks') }}">Limpar</a>
+  {% endif %}
+</form>
+
+<!-- Lista -->
+{% if tasks %}
+<div class="task-list">
+  {% for task in tasks %}
+  <article class="task task--{{ task.priority }}{% if task.status == 'concluida' %} task--done{% endif %}">
+    <div class="task__check">
+      <form class="inline-form" method="post" action="{{ url_for('tasks.toggle_done', task_id=task.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" title="Alternar conclusão" aria-label="Concluir tarefa">
+          {{ "✓" if task.status == "concluida" else "" }}
+        </button>
+      </form>
+    </div>
+
+    <div class="task__body">
+      <div class="task__title">{{ task.title }}</div>
+      {% if task.description %}
+      <div class="task__desc">{{ task.description }}</div>
+      {% endif %}
+      <div class="task__meta">
+        <span class="tag tag--{{ task.status }}">{{ task.status_label }}</span>
+        <span class="tag tag--{{ task.priority }}">Prioridade {{ task.priority_label }}</span>
+      </div>
+    </div>
+
+    <div class="task__actions">
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('tasks.edit_task', task_id=task.id) }}">Editar</a>
+      <form class="inline-form" method="post"
+            action="{{ url_for('tasks.delete_task', task_id=task.id) }}"
+            data-confirm="Excluir esta tarefa? Esta ação não pode ser desfeita.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn--danger btn--sm">Excluir</button>
+      </form>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="empty__icon" aria-hidden="true">⛨</div>
+  {% if active_term or active_status %}
+  <p>Nenhuma tarefa corresponde ao filtro aplicado.</p>
+  <a class="btn btn--ghost btn--sm" href="{{ url_for('tasks.list_tasks') }}">Limpar filtro</a>
+  {% else %}
+  <p>Você ainda não tem tarefas. Que tal começar agora?</p>
+  <a class="btn btn--primary" href="{{ url_for('tasks.create_task') }}">+ Criar primeira tarefa</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

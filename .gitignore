@@ -1,0 +1,53 @@
+# ============================================================================
+# TaskGuard — .gitignore
+# ============================================================================
+
+# --- Segredos e ambiente ---
+.env
+*.env
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# --- Ambientes virtuais ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Testes e cobertura ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+reports/
+
+# --- Logs e banco de dados local ---
+logs/*.log
+logs/*.db
+logs/central/
+*.sqlite
+*.sqlite3
+
+# --- Relatórios de segurança (gerados pela pipeline) ---
+*.sarif
+bandit-report.*
+dependency-check-report.*
+zap-report.*
+
+# --- IDE / SO ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

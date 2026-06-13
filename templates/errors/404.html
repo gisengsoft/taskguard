@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Página não encontrada{% endblock %}
+{% block content %}
+<div class="errorpage">
+  <div class="errorpage__code">404</div>
+  <h1>Página não encontrada</h1>
+  <p class="errorpage__msg">O recurso solicitado não existe ou foi movido.</p>
+  <a class="btn btn--primary" href="{{ url_for('main.index') }}">Voltar ao início</a>
+</div>
+{% endblock %}

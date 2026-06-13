@@ -1,0 +1,202 @@
+% ===========================================================================
+%  TaskGuard — Relatório Acadêmico (fonte editável em LaTeX)
+%
+%  Como compilar:
+%     latexmk -pdf relatorio_academico.tex          (recomendado)
+%   ou
+%     pdflatex relatorio_academico.tex  (rode 2x p/ numeração e referências)
+%
+%  Compila com pdfLaTeX e usa apenas pacotes comuns (TeX Live / MiKTeX /
+%  Overleaf). Se a sua distribuição tiver o babel em português, descomente a
+%  linha indicada abaixo para ativar a hifenização do português.
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Fonte vetorial: usa Latin Modern (lmodern) quando disponivel; se a sua
+% distribuicao nao tiver, cai para o trio Times/Helvetica/Courier (todos
+% vetoriais). Em ambos os casos a saida fica nitida, sem fontes bitmap.
+\IfFileExists{lmodern.sty}{%
+  \usepackage{lmodern}%
+}{%
+  \IfFileExists{mathptmx.sty}{\usepackage{mathptmx}}{}%
+  \IfFileExists{helvet.sty}{\usepackage[scaled=0.92]{helvet}}{}%
+  \IfFileExists{courier.sty}{\usepackage{courier}}{}%
+}
+\usepackage{microtype}
+% \usepackage[brazilian]{babel}   % <- descomente em uma distro TeX completa
+\usepackage[a4paper,top=2cm,bottom=2.2cm,left=2.2cm,right=2.2cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ----- Paleta "console de segurança" -----
+\definecolor{tgGreen}{RGB}{34,139,87}
+\definecolor{tgGreenD}{RGB}{20,83,52}
+\definecolor{tgGreenL}{RGB}{225,242,232}
+\definecolor{tgInk}{RGB}{20,24,28}
+\definecolor{tgGray}{RGB}{90,98,108}
+
+% ----- Cabeçalhos de seção coloridos -----
+\titleformat{\section}{\Large\bfseries\color{tgGreenD}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{tgGreenD}}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+% ----- Rodapé -----
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[L]{\footnotesize\color{tgGray}TaskGuard \textbullet{} Relatório Acadêmico DevSecOps}
+\fancyfoot[R]{\footnotesize\color{tgGray}\thepage}
+
+% ----- Estilo de tabela -----
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\thd}[1]{{\color{white}\bfseries #1}}
+
+% ----- Moldura de figura (substitua pelo \includegraphics real) -----
+% Para inserir um print, troque o conteudo da moldura por, por exemplo:
+%   \includegraphics[width=\linewidth]{screenshots/login.png}
+% Os arquivos de imagem podem ficar na pasta docs/screenshots/.
+\newcommand{\figslot}[2]{%
+  \begin{minipage}[t]{0.47\textwidth}%
+    \fcolorbox{tgGreen}{tgGreenL}{%
+      \begin{minipage}[c][2.6cm][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}%
+        \centering\footnotesize\color{tgGray}\textsf{inserir captura de tela}%
+      \end{minipage}}%
+    \\[4pt]{\footnotesize\color{tgGreenD}\textbf{Figura~#1.}~\textcolor{tgGray}{#2}}%
+  \end{minipage}}
+
+\begin{document}
+
+% =========================== TÍTULO ===========================
+\begin{center}
+  {\fontsize{27}{31}\selectfont\bfseries\color{tgGreenD}TaskGuard}\\[3pt]
+  {\large Implementação de um Sistema Web Seguro de Gerenciamento de Tarefas com Pipeline DevSecOps}\\[5pt]
+  {\small\color{tgGray}Relatório Acadêmico \textbullet{} Engenharia DevSecOps \textbullet{} Python \textbullet{} Flask \textbullet{} Docker \textbullet{} PostgreSQL \textbullet{} OWASP}
+\end{center}
+\vspace{1pt}
+{\color{tgGreen}\hrule height 1.5pt}
+\vspace{8pt}
+
+% =========================== 1. INTRODUÇÃO ===========================
+\section{Introdução}
+A crescente frequência de ataques a aplicações web tornou insustentável tratar a segurança como uma etapa posterior ao desenvolvimento. A cultura \emph{DevSecOps} responde a esse cenário integrando segurança de forma contínua e automatizada ao ciclo de vida do software (\emph{shift-left security}). Este relatório descreve o \textbf{TaskGuard}, um sistema web de gerenciamento de tarefas pessoais desenvolvido em Python/Flask cujo objetivo principal é servir de estudo de caso prático e completo de DevSecOps, contemplando autenticação robusta, defesas contra o OWASP Top 10, persistência em PostgreSQL, containerização, observabilidade e uma \emph{pipeline} de integração contínua que reprova automaticamente código e dependências inseguros.
+
+% =========================== 2. DESENVOLVIMENTO ===========================
+\section{Desenvolvimento}
+A aplicação foi construída sobre o microframework \textbf{Flask~3}, adotando o padrão \emph{application factory} e \emph{blueprints} para modularizar os domínios de autenticação e de tarefas. A persistência utiliza o ORM \textbf{SQLAlchemy} sobre um banco \textbf{PostgreSQL~16}, eliminando a construção manual de SQL. As funcionalidades entregues incluem cadastro e \emph{login} obrigatórios, CRUD completo de tarefas com busca e filtros, marcação de conclusão e isolamento total entre usuários. A camada de apresentação emprega \emph{templates} Jinja2 com auto-\emph{escape} e uma interface própria de tema escuro inspirada em consoles de operações de segurança.
+
+O ecossistema de ferramentas combina \textbf{Docker} (imagem \emph{multi-stage} e execução sem privilégios), \textbf{Docker Compose} (banco PostgreSQL, aplicação, coletor de logs e ZAP), \textbf{GitLab CI/CD} (orquestração da \emph{pipeline}) e a tríade de verificação de segurança \textbf{Bandit} (SAST), \textbf{OWASP Dependency-Check} (SCA) e \textbf{OWASP ZAP} (DAST), além de \texttt{pytest} e \texttt{flake8} para qualidade.
+
+% =========================== 3. ARQUITETURA ===========================
+\section{Arquitetura}
+A arquitetura segue o princípio de \emph{defesa em profundidade}: o tráfego atravessa camadas independentes de proteção antes de alcançar a lógica de negócio. O \emph{middleware} ProxyFix recupera o IP real do cliente; o Flask-Talisman aplica CSP, HSTS e demais cabeçalhos; o Flask-Limiter impõe limites de requisição; e o Flask-WTF valida \emph{tokens} CSRF. Apenas então as rotas dos \emph{blueprints} executam, sempre mediadas pelo ORM. Os principais componentes estão resumidos a seguir.
+
+\begin{tabularx}{\textwidth}{L{2.4cm} L{4.7cm} X}
+\toprule
+\rowcolor{tgGreen}\thd{Camada} & \thd{Componentes} & \thd{Responsabilidade}\\
+\midrule
+Borda          & Proxy reverso, ProxyFix            & Terminação TLS e identificação do cliente\\
+Segurança      & Talisman, Limiter, Flask-WTF       & Cabeçalhos, \emph{rate limiting} e CSRF\\
+Aplicação      & \emph{Blueprints} auth e tasks     & Autenticação, CRUD e autorização\\
+Dados          & SQLAlchemy ORM + PostgreSQL 16     & Acesso parametrizado (anti-SQLi)\\
+Observabilidade & syslog-ng, Fail2Ban, monitor      & Logs centrais e detecção de \emph{brute force}\\
+\bottomrule
+\end{tabularx}
+
+% =========================== 4. PIPELINE ===========================
+\section{Pipeline DevSecOps}
+A \emph{pipeline}, definida em \textbf{GitLab CI/CD} (arquivo \texttt{.gitlab-ci.yml}), encadeia sete \emph{jobs} distribuídos em seis \emph{stages} e interrompe a entrega ao primeiro indício de risco. Os \emph{jobs} de análise de segurança (\texttt{sast} e \texttt{dependency-check}) executam em paralelo no \emph{stage} \texttt{security}, reduzindo o tempo de \emph{feedback}.
+
+\begin{tabularx}{\textwidth}{L{3.0cm} L{4.6cm} X}
+\toprule
+\rowcolor{tgGreen}\thd{Estágio} & \thd{Ferramenta} & \thd{Critério de falha}\\
+\midrule
+lint              & flake8                    & Violação de estilo ou complexidade\\
+test              & pytest + coverage         & Teste quebrado ou cobertura $<$ 80\%\\
+sast              & Bandit                    & Vulnerabilidade de severidade ALTA\\
+dependency-check  & OWASP Dependency-Check    & Dependência com CVSS $\geq$ 7\\
+docker-build      & Docker-in-Docker          & Falha de \emph{build} da imagem\\
+dast              & OWASP ZAP                 & Alerta classificado como FAIL\\
+deploy-stage      & ---                       & Promoção a \emph{staging} (\emph{branch} main)\\
+\bottomrule
+\end{tabularx}
+
+% =========================== 5. SEGURANÇA ===========================
+\section{Segurança}
+A modelagem de ameaças baseou-se em \textbf{STRIDE} e no \textbf{OWASP Top 10}. Para cada ameaça relevante implementou-se uma mitigação concreta e verificável, conforme a tabela abaixo (amostra dos principais controles).
+
+\begin{tabularx}{\textwidth}{L{5.0cm} X}
+\toprule
+\rowcolor{tgGreen}\thd{Ameaça} & \thd{Mitigação implementada}\\
+\midrule
+SQL Injection                   & Acesso exclusivo via ORM com consultas parametrizadas\\
+XSS                             & Auto-\emph{escape} Jinja2 + sanitização + CSP estrita com \emph{nonce}\\
+CSRF                            & \emph{Token} CSRF (Flask-WTF); ações destrutivas apenas via POST\\
+\emph{Brute force}              & \emph{Rate limiting} + bloqueio temporário de conta + senha forte\\
+Broken Access Control (IDOR)    & Validação de proprietário por tarefa; acesso indevido gera 404\\
+Sequestro de sessão             & \emph{Cookies} HttpOnly/Secure/SameSite e \emph{session protection} \emph{strong}\\
+Exposição de credenciais        & \emph{Hash} PBKDF2-SHA256; segredos em variáveis de ambiente\\
+Dependências vulneráveis        & OWASP Dependency-Check na \emph{pipeline} (falha em CVSS $\geq$ 7)\\
+\bottomrule
+\end{tabularx}
+
+% =========================== 6. RESULTADOS ===========================
+\section{Resultados}
+A aplicação foi executada e validada com sucesso, inclusive contra um banco \textbf{PostgreSQL} real (criação de \emph{schema}, persistência via ORM, \emph{hash} de senha e bloqueio por \emph{brute force} confirmados). A suíte automatizada passou integralmente e as defesas de segurança foram verificadas em resposta HTTP real (cabeçalhos presentes, CSRF ativo, XSS neutralizado). O quadro a seguir resume os resultados obtidos.
+
+\begin{tabularx}{\textwidth}{L{6.6cm} X}
+\toprule
+\rowcolor{tgGreen}\thd{Verificação} & \thd{Resultado}\\
+\midrule
+Testes automatizados (pytest)   & 29 testes --- 100\% aprovados\\
+Cobertura de código             & 86,65\% (mínimo exigido: $\geq$ 80\%)\\
+Análise estática (Bandit)       & Nenhuma \emph{issue} de severidade ALTA\\
+Cabeçalhos de segurança         & CSP, HSTS, X-Frame-Options, \emph{nosniff} presentes\\
+Proteção CSRF                   & POST sem \emph{token} rejeitado (HTTP 400)\\
+Proteção contra \emph{brute force} & Conta bloqueada após N tentativas\\
+\emph{Health check}             & HTTP 200 com verificação do banco\\
+\bottomrule
+\end{tabularx}
+
+% =========================== 7. EVIDÊNCIAS ===========================
+\section{Evidências (prints)}
+As capturas de tela do sistema em execução e dos relatórios das ferramentas de segurança devem ser inseridas nas molduras abaixo. Para cada uma, substitua o conteúdo por um comando \texttt{includegraphics} apontando para o arquivo do print (sugestão: mantenha as imagens em \texttt{docs/screenshots/}).
+
+\vspace{6pt}
+\noindent
+\figslot{1}{Tela de login}\hfill\figslot{2}{Painel de tarefas}
+
+\vspace{10pt}
+\noindent
+\figslot{3}{Relatório do OWASP ZAP (DAST)}\hfill\figslot{4}{Pipeline no GitLab CI/CD}
+
+% =========================== 8. CONCLUSÃO ===========================
+\section{Conclusão}
+O TaskGuard demonstra, na prática, que a segurança pode permear todo o ciclo de desenvolvimento sem comprometer a entrega. A combinação de um \emph{backend} bem estruturado, persistência em PostgreSQL, defesas concretas contra as principais ameaças, containerização endurecida e uma \emph{pipeline} GitLab CI/CD que bloqueia automaticamente código e dependências inseguros resulta em um artefato reproduzível e aderente aos princípios de DevSecOps, adequado tanto à avaliação acadêmica quanto ao uso como projeto de portfólio profissional.
+
+% =========================== 9. LIÇÕES ===========================
+\section{Lições aprendidas}
+\begin{itemize}[leftmargin=1.3em,itemsep=2pt,topsep=2pt]
+  \item Automatizar a segurança (SAST, SCA e DAST) na \emph{pipeline} transfere a detecção de falhas para o momento mais barato de corrigi-las.
+  \item Defesa em profundidade importa: nenhum controle isolado é suficiente, e camadas redundantes contêm falhas individuais.
+  \item Observabilidade é parte da segurança: sem logs estruturados e detecção de anomalias, ataques como força bruta passam despercebidos.
+  \item Containerizar com usuário não-\emph{root} e mínimo de privilégios reduz significativamente o impacto de uma eventual exploração.
+\end{itemize}
+
+\vspace{6pt}
+{\color{tgGreen}\hrule height 0.8pt}
+\vspace{4pt}
+\noindent{\small\color{tgGray}\textbf{Autor:} «seu nome completo» \textbullet{} \textbf{Repositório:} \texttt{gitlab.com/«seu-usuario»/taskguard} \textbullet{} Licença MIT}
+
+\end{document}

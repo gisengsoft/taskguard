@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Erro interno{% endblock %}
+{% block content %}
+<div class="errorpage">
+  <div class="errorpage__code">500</div>
+  <h1>Erro interno</h1>
+  <p class="errorpage__msg">Ocorreu um erro inesperado. A equipe foi notificada pelos logs.</p>
+  <a class="btn btn--primary" href="{{ url_for('main.index') }}">Voltar ao início</a>
+</div>
+{% endblock %}

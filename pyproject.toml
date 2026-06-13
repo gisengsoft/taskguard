@@ -1,0 +1,29 @@
+# ============================================================================
+# TaskGuard — Configuração de ferramentas (Bandit e Coverage)
+# ============================================================================
+
+[tool.bandit]
+# Diretórios/arquivos ignorados na análise estática de segurança.
+exclude_dirs = ["tests", ".venv", "venv", "build", "dist", "docs"]
+# Em testes é comum usar asserts; portanto eles são analisados à parte.
+skips = []
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "run.py",
+]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# Falha a verificação de cobertura abaixo deste percentual.
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

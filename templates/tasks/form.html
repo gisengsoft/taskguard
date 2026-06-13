@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar tarefa" if mode == "edit" else "Nova tarefa" }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">{{ "Edição" if mode == "edit" else "Cadastro" }}</p>
+    <h1>{{ "Editar tarefa" if mode == "edit" else "Nova tarefa" }}</h1>
+  </div>
+  <a class="btn btn--ghost" href="{{ url_for('tasks.list_tasks') }}">← Voltar</a>
+</div>
+
+<div class="panel" style="max-width: 640px;">
+  <form method="post" novalidate
+        action="{{ url_for('tasks.edit_task', task_id=task.id) if mode == 'edit' else url_for('tasks.create_task') }}">
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      {{ form.title.label }}
+      {{ form.title(placeholder="Ex.: Revisar relatório de segurança") }}
+      {% for error in form.title.errors %}
+      <span class="field__error">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.description.label }}
+      {{ form.description(placeholder="Detalhes opcionais da tarefa…") }}
+      {% for error in form.description.errors %}
+      <span class="field__error">{{ error }}</span>
+      {% endfor %}
+      <span class="field-hint">Até 2000 caracteres.</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        {{ form.status.label }}
+        {{ form.status() }}
+      </div>
+      <div class="field">
+        {{ form.priority.label }}
+        {{ form.priority() }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit(class="btn btn--primary") }}
+      <a class="btn btn--ghost" href="{{ url_for('tasks.list_tasks') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

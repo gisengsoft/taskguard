@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Entrar{% endblock %}
+
+{% block layout %}
+<div class="auth-shell">
+  <div class="auth-card">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <p class="eyebrow">Acesso restrito</p>
+    <h1>Entrar no TaskGuard</h1>
+    <p class="subtitle">Autenticação obrigatória para gerenciar suas tarefas.</p>
+
+    <form method="post" action="{{ url_for('auth.login') }}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="field">
+        {{ form.username.label }}
+        {{ form.username(autocomplete="username", placeholder="seu.usuario") }}
+        {% for error in form.username.errors %}
+        <span class="field__error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.password.label }}
+        {{ form.password(autocomplete="current-password", placeholder="••••••••") }}
+        {% for error in form.password.errors %}
+        <span class="field__error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="field">
+        <label class="checkbox">{{ form.remember_me() }} {{ form.remember_me.label.text }}</label>
+      </div>
+
+      {{ form.submit(class="btn btn--primary btn--block") }}
+    </form>
+
+    <p class="auth-foot">
+      Não tem conta? <a href="{{ url_for('auth.register') }}">Criar uma agora</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

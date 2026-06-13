@@ -1,0 +1,34 @@
+# Controle de versão
+.git
+.gitignore
+
+# Ambientes virtuais e caches Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+.coverage
+coverage.xml
+
+# Artefatos de relatórios de segurança (gerados pela pipeline)
+reports/
+*.sarif
+
+# Logs e banco local (não devem entrar na imagem)
+logs/*.log
+logs/*.db
+logs/central/
+
+# Documentação pesada / IDE
+.idea
+.vscode
+*.md
+!README.md
+
+# Ambiente local
+.env

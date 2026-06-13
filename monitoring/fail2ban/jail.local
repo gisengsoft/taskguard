@@ -1,0 +1,29 @@
+# ============================================================================
+# Jail do Fail2Ban para o TaskGuard.
+#
+# Instalação (host Linux com Fail2Ban):
+#   sudo cp monitoring/fail2ban/filter.d/taskguard-auth.conf /etc/fail2ban/filter.d/
+#   sudo cp monitoring/fail2ban/jail.local /etc/fail2ban/jail.d/taskguard.local
+#   # ajuste o caminho de logpath para o seu security.log
+#   sudo systemctl restart fail2ban
+#   sudo fail2ban-client status taskguard
+# ============================================================================
+
+[DEFAULT]
+# Tempo (s) de banimento e janela de observação.
+bantime  = 3600
+findtime = 600
+# Endereços jamais banidos (localhost e redes internas).
+ignoreip = 127.0.0.1/8 ::1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+# Ação: banir o IP via iptables/nftables (padrão da distro).
+banaction = iptables-multiport
+
+[taskguard]
+enabled  = true
+filter   = taskguard-auth
+# Aponte para o arquivo de log de segurança da aplicação.
+logpath  = /var/log/taskguard/security.log
+# Número de falhas dentro de findtime que dispara o banimento.
+maxretry = 5
+# Portas protegidas (HTTP/HTTPS).
+port     = http,https

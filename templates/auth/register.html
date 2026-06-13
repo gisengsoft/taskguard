@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Criar conta{% endblock %}
+
+{% block layout %}
+<div class="auth-shell">
+  <div class="auth-card">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <p class="eyebrow">Novo acesso</p>
+    <h1>Criar conta</h1>
+    <p class="subtitle">A senha exige no mínimo 8 caracteres, com maiúscula, minúscula e número.</p>
+
+    <form method="post" action="{{ url_for('auth.register') }}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="field">
+        {{ form.username.label }}
+        {{ form.username(autocomplete="username", placeholder="seu.usuario") }}
+        {% for error in form.username.errors %}
+        <span class="field__error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.email.label }}
+        {{ form.email(autocomplete="email", placeholder="voce@exemplo.com") }}
+        {% for error in form.email.errors %}
+        <span class="field__error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.password.label }}
+        {{ form.password(autocomplete="new-password", placeholder="••••••••") }}
+        {% for error in form.password.errors %}
+        <span class="field__error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.confirm_password.label }}
+        {{ form.confirm_password(autocomplete="new-password", placeholder="••••••••") }}
+        {% for error in form.confirm_password.errors %}
+        <span class="field__error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      {{ form.submit(class="btn btn--primary btn--block") }}
+    </form>
+
+    <p class="auth-foot">
+      Já possui conta? <a href="{{ url_for('auth.login') }}">Entrar</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
