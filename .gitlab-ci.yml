@@ -1,6 +1,6 @@
 workflow:
   rules:
-    - if: $CI_COMMIT_BRANCH
+    - if: '$CI_COMMIT_BRANCH'
 
 stages:
   - lint
@@ -86,4 +86,4 @@ deploy-stage:
   script:
     - echo "Deploy para staging"
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: '$CI_COMMIT_BRANCH == "main"'
