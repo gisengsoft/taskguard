@@ -189,8 +189,8 @@ dast:
   services:
     - docker:27-dind
 
-  needs:
-    - docker-build
+  # A instrução 'needs: - docker-build' foi removida daqui para evitar o bug do GitLab.
+  # O GitLab vai esperar a etapa de build naturalmente.
 
   script:
     - docker load < taskguard-ci.tar.gz
