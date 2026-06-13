@@ -28,7 +28,7 @@ fi
 
 # In Docker-in-Docker (DinD), bind mounts from the host might map wrong paths.
 # We create a container, copy files to it, run the analysis, and copy the reports back.
-container_id=$(docker create --rm \
+container_id=$(docker create \
   --entrypoint "/usr/share/dependency-check/bin/dependency-check.sh" \
   "${DC_IMAGE}" \
   --scan /src \
@@ -64,5 +64,6 @@ docker cp "$container_id:/report/." "${REPORTS_DIR}/" || true
 
 # Update cache
 docker cp "$container_id:/usr/share/dependency-check/data/." "${HOME}/.dependency-check-data/" || true
+docker rm "$container_id" || true
 
 echo "==> [SCA] Concluído."

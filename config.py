@@ -129,6 +129,15 @@ class ProductionConfig(BaseConfig):
     SESSION_COOKIE_SECURE = False
     FORCE_HTTPS = False
 
+    # Evita fallback silencioso para SQLite em produção caso a variável
+    # não seja lida corretamente do ambiente.
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        f"postgresql+psycopg://{os.getenv('POSTGRES_USER', 'taskguard')}:{os.getenv('POSTGRES_PASSWORD', 'taskguard')}@db:5432/{os.getenv('POSTGRES_DB', 'taskguard')}"
+    )
+    if SQLALCHEMY_DATABASE_URI.startswith("sqlite"):
+        SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg://{os.getenv('POSTGRES_USER', 'taskguard')}:{os.getenv('POSTGRES_PASSWORD', 'taskguard')}@db:5432/{os.getenv('POSTGRES_DB', 'taskguard')}"
+
 
 # Mapa de seleção por nome (usado em create_app).
 config_by_name = {

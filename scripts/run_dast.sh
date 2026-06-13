@@ -44,7 +44,7 @@ if [[ "$USE_COMPOSE" == true ]]; then
   done
 
   echo "==> [DAST] Executando OWASP ZAP Baseline Scan via container..."
-  container_id=$(docker create --rm \
+  container_id=$(docker create \
     --network taskguard_taskguard-net \
     ghcr.io/zaproxy/zaproxy:stable \
     zap-baseline.py -t "http://taskguard-web:8000" -c rules.tsv -r zap-report.html -J zap-report.json -I)
@@ -56,14 +56,16 @@ if [[ "$USE_COMPOSE" == true ]]; then
   docker start -a "$container_id" || true
   docker cp "$container_id:/zap/wrk/zap-report.html" "${REPORTS_DIR}/" || true
   docker cp "$container_id:/zap/wrk/zap-report.json" "${REPORTS_DIR}/" || true
+  docker rm "$container_id" || true
 else
   echo "==> [DAST] Escaneando alvo externo: ${TARGET}"
-  container_id=$(docker create --rm \
+  container_id=$(docker create \
     ghcr.io/zaproxy/zaproxy:stable \
     zap-baseline.py -t "${TARGET}" -r zap-report.html -J zap-report.json -I)
   docker start -a "$container_id" || true
   docker cp "$container_id:/zap/wrk/zap-report.html" "${REPORTS_DIR}/" || true
   docker cp "$container_id:/zap/wrk/zap-report.json" "${REPORTS_DIR}/" || true
+  docker rm "$container_id" || true
 fi
 
 echo "==> [DAST] Scan concluído. Relatório em ${REPORTS_DIR}/zap-report.html"
