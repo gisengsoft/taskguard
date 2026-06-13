@@ -515,7 +515,7 @@ O **TaskGuard** mostra que segurança não é uma etapa final, e sim um fio cond
 
 Projeto desenvolvido como estudo de caso de **Engenharia DevSecOps**.
 
-- **«Substitua por seu nome»** · [GitLab](https://gitlab.com/<seu-usuario>) · [LinkedIn](https://linkedin.com/in/<seu-perfil>)
+- **GILSON INÁCIO DA SILVA** · [GitLab](https://gitlab.com/gilson.engsoft-group/taskguard) · [LinkedIn](https://www.linkedin.com/in/gilsoninsilva/)
 
 <div align="center">
 
