@@ -51,3 +51,6 @@ zap-report.*
 *.swp
 .DS_Store
 Thumbs.db
+
+
+!pipeline/zap/rules.tsv
