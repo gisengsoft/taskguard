@@ -175,8 +175,8 @@ dast:
   script:
     - docker load < taskguard-ci.tar.gz
     - docker network create "$ZAP_NET"
-    - docker run -d --name taskguard-web --network "$ZAP_NET"
-        -e SECRET_KEY=ci-dast-secret -e FLASK_CONFIG=production
+    - docker run -d --name taskguard-web --network "$ZAP_NET" \
+        -e SECRET_KEY=ci-dast-secret -e FLASK_CONFIG=production \
         "$IMAGE_LOCAL"
     - |
       echo "Aguardando health check da aplicação..."
